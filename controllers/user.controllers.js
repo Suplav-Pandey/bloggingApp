@@ -88,7 +88,7 @@ async function handleViewProfile(req, res){
             role: fullUser.role
         });
     }catch(err){
-        res.status(400).json({"error":err.message})
+        res.status(401).json({"error":err.message})
     }
 }
 
@@ -99,11 +99,11 @@ async function handleEditProfile(req, res){
         const updatedUser= req.body;
 
         const password= updatedUser?.password;
-        const hashPassword= (password)? await bcrypt.hash(password, 10) : password;//hashing password before storing it
+        if(password)updatedUser.password= await bcrypt.hash(password, 10);//hashing password before storing it
 
         const fullUser= await User.findOneAndUpdate({_id: user._id}, {
             username: updatedUser?.username, 
-            password: hashPassword, 
+            password: updatedUser?.password, 
             profileImgUrl: updatedUser?.profileImgUrl,// * restore whole image in firebase and deleting prev one
             role: updatedUser?.role
         },{runValidators: true});
