@@ -9,182 +9,215 @@ This document provides a concise overview of the Blogify API endpoints, their fu
 All user-related routes are prefixed with `/users`.
 
 ### 1. User Registration
-
-- **Endpoint:** `POST /users/register`
+- `POST /users/register`
 - **Description:** Registers a new user.
-- **Input (Request Body):**
+- **Body:**
   ```json
   {
-    "username": {
-      "firstname": "John",
-      "lastname": "Doe"
-    },
+    "username": { "firstname": "John", "lastname": "Doe" },
     "email": "john.doe@example.com",
     "password": "yourpassword"
   }
   ```
-- **Output (Success Response):**
-  - **Status:** `201`
-  - **Body:**
-    ```json
-    {
-      "msg": "user registered successfully"
-    }
-    ```
-  - **Cookie:** Sets a `token` cookie.
-- **Output (Error Response):**
-  - **Status:** `400`
-  - **Body (Validation Error):**
-    ```json
-    {
-      "error": [
-        {
-          "type": "field",
-          "value": "...",
-          "msg": "...",
-          "path": "...",
-          "location": "body"
-        }
-      ]
-    }
-    ```
-  - **Body (Other Error):**
-    ```json
-    {
-      "error": "Error message"
-    }
-    ```
+- **Success (201):** Sets `token` cookie.
+  ```json
+  { "msg": "user registered successfully" }
+  ```
+- **Error (400):**
+  ```json
+  { "error": "..." } // or array of validation errors
+  ```
 
 ### 2. User Login
-
-- **Endpoint:** `POST /users/login`
+- `POST /users/login`
 - **Description:** Logs in an existing user.
-- **Input (Request Body):**
+- **Body:**
   ```json
   {
     "email": "john.doe@example.com",
     "password": "yourpassword"
   }
   ```
-- **Output (Success Response):**
-  - **Status:** `200`
-  - **Body:**
-    ```json
-    {
-      "msg": "user logined successfully"
-    }
-    ```
-  - **Cookie:** Sets a `token` cookie.
-- **Output (Error Response):**
-  - **Status:** `400`
-  - **Body:**
-    ```json
-    {
-      "error": "email or password is incorrect"
-    }
-    ```
+- **Success (200):** Sets `token` cookie.
+  ```json
+  { "msg": "user logined successfully" }
+  ```
+- **Error (400):**
+  ```json
+  { "error": "email or password is incorrect" }
+  ```
 
 ### 3. User Logout
-
-- **Endpoint:** `POST /users/logout`
+- `POST /users/logout`
 - **Description:** Logs out the current user by clearing the token.
-- **Input:** None (Requires `token` cookie).
-- **Output (Success Response):**
-  - **Status:** `200`
-  - **Body:**
-    ```json
-    {
-      "msg": "logged out successfully"
-    }
-    ```
-  - **Cookie:** Clears the `token` cookie.
-- **Output (Error Response):**
-  - **Status:** `400`
-  - **Body:**
-    ```json
-    {
-      "error": "you are not logged in"
-    }
-    ```
+- **Auth:** Requires `token` cookie.
+- **Success (200):** Clears `token` cookie.
+  ```json
+  { "msg": "logged out successfully" }
+  ```
+- **Error (400):**
+  ```json
+  { "error": "you are not logged in" }
+  ```
 
 ### 4. View User Profile
-
-- **Endpoint:** `GET /users/profile`
+- `GET /users/profile`
 - **Description:** Retrieves the profile of the currently logged-in user.
-- **Input:** None (Requires `token` cookie).
-- **Output (Success Response):**
-  - **Status:** `200`
-  - **Body:**
-    ```json
-    {
-      "firstname": "John",
-      "lastname": "Doe",
-      "email": "john.doe@example.com",
-      "profileImgUrl": "/userProfile/default.png",
-      "role": "user"
-    }
-    ```
-- **Output (Error Response):**
-  - **Status:** `401`
-  - **Body:**
-    ```json
-    {
-      "error": "invalid token"
-    }
-    ```
-
-### 5. Edit User Profile
-
-- **Endpoint:** `POST /users/profile`
-- **Description:** Updates the profile of the currently logged-in user.
-- **Input (Request Body):**
-  - Any combination of the fields below.
+- **Auth:** Requires `token` cookie.
+- **Success (200):**
   ```json
   {
-    "username": {
-        "firstname": "Johnny",
-        "lastname": "Doer"
-    },
+    "firstname": "John",
+    "lastname": "Doe",
+    "email": "john.doe@example.com",
+    "profileImgUrl": "/userProfile/default.png",
+    "role": "user"
+  }
+  ```
+- **Error (401):**
+  ```json
+  { "error": "invalid token" }
+  ```
+
+### 5. Edit User Profile
+- `POST /users/profile`
+- **Description:** Updates the profile of the currently logged-in user.
+- **Auth:** Requires `token` cookie.
+- **Body (Optional fields):**
+  ```json
+  {
+    "username": { "firstname": "Johnny", "lastname": "Doer" },
     "password": "newpassword123",
     "profileImgUrl": "/new/image.png",
     "role": "admin"
   }
   ```
-- **Output (Success Response):**
-  - **Status:** `200`
-  - **Body:**
-    ```json
-    {
-      "msg": "user updated"
-    }
-    ```
-- **Output (Error Response):**
-  - **Status:** `400` (Validation error) or `401` (Invalid token).
-  - **Body:**
-    ```json
-    {
-      "error": "Error message"
-    }
-    ```
+- **Success (200):**
+  ```json
+  { "msg": "user updated" }
+  ```
+- **Error (400/401):**
+  ```json
+  { "error": "Error message" }
+  ```
 
 ### 6. Delete User Account
-
-- **Endpoint:** `POST /users/delete`
+- `POST /users/delete`
 - **Description:** Deletes the account of the currently logged-in user.
-- **Input:** None (Requires `token` cookie).
-- **Output (Success Response):**
-  - **Status:** `200`
-  - **Body:**
-    ```json
-    {
-      "msg": "user deleted successfully"
-    }
-    ```
-- **Output (Error Response):**
-  - **Status:** `401` (Invalid token) or `500` (Server error).
-  - **Body:**
-    ```json
-    {
-      "error": "Error message"
-    }
-    ```
+- **Auth:** Requires `token` cookie.
+- **Success (200):**
+  ```json
+  { "msg": "user deleted successfully" }
+  ```
+- **Error (401/500):**
+  ```json
+  { "error": "Error message" }
+  ```
+
+---
+
+## Blog Routes
+
+All blog-related routes are prefixed with `/blogs`.
+
+### 1. List All Blogs
+- `GET /blogs/listAll`
+- **Description:** Lists all blogs (without their body content).
+- **Success (200):**
+  ```json
+  { "blogs": [ ... ] }
+  ```
+  or
+  ```json
+  { "msg": "no Blog created yet, be the first one" }
+  ```
+- **Error (500):**
+  ```json
+  { "error": "Error message" }
+  ```
+
+### 2. View Blog
+- `GET /blogs/view/:id`
+- **Description:** View a single blog by its ID.
+- **Success (200):**
+  ```json
+  { "blog": { ... } }
+  ```
+- **Error (404/500):**
+  ```json
+  { "error": "Error message" }
+  ```
+
+### 3. List User's Blogs
+- `GET /blogs/listUser`
+- **Description:** Lists all blogs created by the logged-in user (without their body content).
+- **Auth:** Requires `token` cookie or header.
+- **Success (200):**
+  ```json
+  { "blogs": [ ... ] }
+  ```
+  or
+  ```json
+  { "msg": "you do not have any blog yet, create one" }
+  ```
+- **Error (401/500):**
+  ```json
+  { "error": "Error message" }
+  ```
+
+### 4. Create Blog
+- `POST /blogs/create`
+- **Description:** Creates a new blog for the logged-in user.
+- **Auth:** Requires `token` cookie or header.
+- **Body:**
+  ```json
+  {
+    "title": "...",
+    "desc": "...",
+    "coverImgUrl": "...",
+    "body": "..."
+  }
+  ```
+- **Success (201):**
+  ```json
+  { "msg": "blog created successfully", "blog": { ... } }
+  ```
+- **Error (400/401):**
+  ```json
+  { "error": "Error message" } // or array of validation errors
+  ```
+
+### 5. Edit Blog
+- `POST /blogs/edit/:id`
+- **Description:** Edits an existing blog (only by the owner).
+- **Auth:** Requires `token` cookie or header.
+- **Body (Optional fields):**
+  ```json
+  {
+    "title": "...",
+    "desc": "...",
+    "coverImgUrl": "...",
+    "body": "..."
+  }
+  ```
+- **Success (200):**
+  ```json
+  { "msg": "blog updated successfully" }
+  ```
+- **Error (400/401/403):**
+  ```json
+  { "error": "Error message" } // or array of validation errors
+  ```
+
+### 6. Delete Blog
+- `POST /blogs/delete/:id`
+- **Description:** Deletes a blog (only by the owner).
+- **Auth:** Requires `token` cookie or header.
+- **Success (200):**
+  ```json
+  { "msg": "blog deleted successfully" }
+  ```
+- **Error (401/403/400):**
+  ```json
+  { "error": "Error message" }
+  ```

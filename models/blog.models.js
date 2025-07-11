@@ -14,7 +14,7 @@ const blogSchema= new mongoose.Schema({
         required: true,
     },
     body:{
-        type:string,
+        type:String,
         minLength: [30, 'body must be at least 50 char long']
     },
     owner:{
