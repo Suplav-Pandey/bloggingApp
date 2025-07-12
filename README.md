@@ -221,3 +221,93 @@ All blog-related routes are prefixed with `/blogs`.
   ```json
   { "error": "Error message" }
   ```
+
+---
+
+## Comment Routes
+
+All comment-related routes are prefixed with `/comments`.
+
+### 1. List Comments for a Blog
+- `GET /comments/listBlogComments/:blogId`
+- **Description:** Lists all comments for a specific blog, populated with the owner's information.
+- **Success (200):**
+  ```json
+  { "comments": [ ... ] }
+  ```
+  or
+  ```json
+  { "msg": "no comment on the blog, be the first one" }
+  ```
+- **Error (500):**
+  ```json
+  { "error": "An internal server error occurred" }
+  ```
+
+### 2. List a User's Comments
+- `GET /comments/listUserComments`
+- **Description:** Lists all comments made by the currently logged-in user.
+- **Auth:** Requires `token` cookie or header.
+- **Success (200):**
+  ```json
+  { "comments": [ ... ] }
+  ```
+  or
+  ```json
+  { "msg": "you did not have any comment yet" }
+  ```
+- **Error (401/500):**
+  ```json
+  { "error": "Error message" }
+  ```
+
+### 3. Create a Comment
+- `POST /comments/createComment/:blogId`
+- **Description:** Adds a new comment to a specific blog.
+- **Auth:** Requires `token` cookie or header.
+- **Body:**
+  ```json
+  {
+    "body": "This is a great post!"
+  }
+  ```
+- **Success (201):**
+  ```json
+  { "msg": "comment created successfully" }
+  ```
+- **Error (400/401/500):**
+  ```json
+  { "error": "Error message" } // or array of validation errors
+  ```
+
+### 4. Edit a Comment
+- `POST /comments/editComment/:id`
+- **Description:** Edits an existing comment (only by the owner).
+- **Auth:** Requires `token` cookie or header.
+- **Body:**
+  ```json
+  {
+    "body": "This is an updated comment."
+  }
+  ```
+- **Success (200):**
+  ```json
+  { "msg": "comment edited successfully" }
+  ```
+- **Error (400/401/403/500):**
+  ```json
+  { "error": "Error message" } // or array of validation errors
+  ```
+
+### 5. Delete a Comment
+- `POST /comments/deleteComment/:id`
+- **Description:** Deletes a comment (only by the owner).
+- **Auth:** Requires `token` cookie or header.
+- **Success (200):**
+  ```json
+  { "msg": "comment deleted successfully" }
+  ```
+- **Error (401/403/500):**
+  ```json
+  { "error": "Error message" }
+  ```

@@ -5,6 +5,7 @@ const express=require("express");//requiring code of express in constant express
 const connectDb = require("./config/db");
 const userRoutes= require("./routes/user.routes");
 const blogRoutes= require("./routes/blog.routes");
+const commentRoutes=require("./routes/comment.routes");
 const cookieParser = require("cookie-parser");
 const port= process.env.PORT || 3000;
 
@@ -19,6 +20,7 @@ app.use(cookieParser());//to read cookies
 app.get("/", (req,res)=>res.send("suplav"));//basic health route for checking in browser
 app.use("/users" ,userRoutes);//user routes
 app.use("/blogs", blogRoutes);//blog related routes
+app.use("/comments", commentRoutes);//comment related routes
 
 
 app.listen(port, (error)=>{
