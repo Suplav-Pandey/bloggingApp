@@ -17,7 +17,7 @@ router.post("/create", [
     body('desc').trim().isLength({min:5}).withMessage("Desc must be at least 5 character long"),
     body('body').trim().isLength({min:30}).withMessage("body must be at least 30 character long"),
     // body('coverImgUrl').trim().isURL().withMessage("cover image must be a valid URL")
-],handleBlogCreation);
+], upload.single('file') ,handleBlogCreation);
 
 router.post("/edit/:id", [
     body('title').optional({ checkFalsy: true }).trim().isLength({min:3}).withMessage("title must be at least 3 character long"),
@@ -25,7 +25,7 @@ router.post("/edit/:id", [
     body('body').optional({ checkFalsy: true }
     ).trim().isLength({min:30}).withMessage("body must be at least 30 character long"),
     // body('coverImgUrl').optional().trim().isURL().withMessage("cover image must be a valid URL")
-] ,handleBlogEdit);
+], upload.single('file') ,handleBlogEdit);
 
 router.post("/delete/:id", handleBlogDelete);
 

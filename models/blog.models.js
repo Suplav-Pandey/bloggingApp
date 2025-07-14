@@ -9,9 +9,15 @@ const blogSchema= new mongoose.Schema({
         type:String,
         minLength: [5, 'description must be at least 5 char long']
     },
-    coverImgUrl: {
-        type: String,
-        required: true,
+    coverImg:{
+        url:{
+            type: String,
+            required: true,
+        },
+        id:{
+            type:String,
+            required: true
+        }
     },
     body:{
         type:String,

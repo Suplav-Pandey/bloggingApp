@@ -22,10 +22,10 @@ const userSchema= mongoose.Schema({
         minlength: [3, 'password must be at least 3 char long'],
         select: false
     },
-    profileImgUrl:{
-        type: String,
-        default: "/userProfile/default.png"
-    },
+    profileImg:{
+        url:String,
+        id: String
+    },    
     role:{
         type:String,
         enum: ["admin", "user"],

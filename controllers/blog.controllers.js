@@ -51,9 +51,18 @@ async function handleBlogCreation(req, res){
         const errors= validationResult(req);//errors if validation failed
         if(!errors.isEmpty()){
             return res.status(400).json({"error": errors.array()});
+        } 
+
+        //taking a coverimage of blog
+        if(!req.file){
+            return res.status(400).json({"error": "converImg is not uploaded"});
         }
-        //take actual image file through multer-> upload it in any fileStorage -> then take its actual url.
-        const {title, desc, coverImgUrl, body}=req.body;
+        const converImg=  {
+            url:req.file.path,
+            id: req.file.filename
+        };
+
+        const {title, desc, body}=req.body;
 
         const blog= await Blog.create({
             title,
@@ -83,17 +92,24 @@ async function handleBlogEdit(req,res){
             return res.status(400).json({"error": errors.array()});
         }
 
+        //taking coverimage of blog
+        req.body.coverImg= (!req.file) ? undefined : {
+            url:req.file.path,
+            id: req.file.filename
+        };
+
         const blog= await Blog.findOneAndUpdate({ _id: id, owner: user._id },{
             title: req.body?.title,
             desc: req.body?.desc,
-            coverImgUrl: req.body?.coverImgUrl,
+            coverImg: req.body?.coverImg,
             body: req.body?.body
         });//we will find a blog with given id and and owner as current user and then will update it
 
         if(!blog){
             return res.status(403).json({"error": "current logined user is not owner or blog not found"});
         }
-
+        //new image uploaded so deleting old coverimage
+        if(req.file)cloudinary.uploader.destroy(`Blogging-Web/${blog.coverImg.id}`);
         return res.status(200).json({"msg": "blog updated successfully"});
     }
     catch(err){
@@ -114,6 +130,8 @@ async function handleBlogDelete(req,res){
         if(!blog){
             return res.status(403).json({"error": "current logined user is not owner of blog or blog not found"});
         }
+        //deleting coverimage of the blog
+        cloudinary.uploader.destroy(`Blogging-Web/${blog.coverImg.id}`);
         
         return res.status(200).json({"msg": "blog deleted successfully"});
     }
