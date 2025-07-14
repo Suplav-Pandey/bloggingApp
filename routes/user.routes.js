@@ -3,6 +3,7 @@ const { handleUserRegister, handleUserLogin, handleUserLogout, handleViewProfile
 const {body}= require("express-validator");
 const upload= require("../config/multer");
 const authe= require("../middleware/authe");
+const fileUpload = require("../middleware/multer");
 const router = Router();
 
 router.post("/register", 
@@ -26,9 +27,9 @@ router.post("/delete", handleUserdelete);//delete user account and all post and 
 
 router.get("/profile", handleViewProfile);//view user profile
 
-router.post("/profile",
-    [body('username.firstname').trim().isLength({min:3}).withMessage("firstname must be at least 3 char long"),
-    body('password').isLength({min:3}).withMessage("password must be at least 3 char long")]
-, upload.single("file") ,handleEditProfile);//edit user profile 
+router.post("/profile", fileUpload,
+    [body('username.firstname').optional().trim().isLength({min:3}).withMessage("firstname must be at least 3 char long"),
+    body('password').optional().isLength({min:3}).withMessage("password must be at least 3 char long")]
+,handleEditProfile);//edit user profile 
 
 module.exports = router;

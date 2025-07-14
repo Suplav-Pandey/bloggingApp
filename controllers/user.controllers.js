@@ -75,12 +75,12 @@ async function handleUserdelete(req, res){
 
         //user found so delete all information associated with it
         //deleting its porfile image from cloudinary
-        cloudinary.uploader.destroy(`Blogging-Web/${userToBeDeleted?.profileImg.id}`);//review it
+        cloudinary.uploader.destroy(`BloggingWeb/${userToBeDeleted?.profileImg.id}`);//review it
         //deleting all comments on the blogs created by user
         const blogs= await Blog.find({owner : user._id})
         blogs.forEach(async (blog)=>{
             //deleting coverimage of every blog from cloudinary
-            cloudinary.uploader.destroy(`Blogging-Web/${blog.coverImg.id}`);//review it
+            cloudinary.uploader.destroy(`BloggingWeb/${blog.coverImg.id}`);//review it
             await Comments.deleteMany({blog: blog._id});//deleting comments
         })
         //deleting all blogs
@@ -146,11 +146,11 @@ async function handleEditProfile(req, res){
 
         //deleting old profile image from cloudinary when we recieve new one or a request of removing
         if(req.file || updatedUser.removeProfileImg){
-            cloudinary.uploader.destroy(`Blogging-Web/${fullUser?.profileImg.id}`);
+            cloudinary.uploader.destroy(`BloggingWeb/${fullUser?.profileImg.id}`);
         }
 
         //new token shall be genetared to accomodate new user name and profile image url in it
-        const token= jwt.sign({_id: user._id, name: username.firstname, profileImg: profileImg?.url}, process.env.JWT_SECRET);
+        const token= jwt.sign({_id: user._id, name: fullUser.username.firstname, profileImg: profileImg?.url}, process.env.JWT_SECRET);
         res.status(200).cookie('token', token).json({"msg": "user updated"});
     }catch(err){
         res.status(400).json({"error":err.message});

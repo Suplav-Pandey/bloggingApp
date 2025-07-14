@@ -1,16 +1,25 @@
 # Blogify API
 
-This document provides a concise overview of the Blogify API endpoints, their functionalities, expected inputs, and possible outputs.
+A RESTful API for a blogging platform with user authentication, blog management, and commenting functionality.
+
+---
+
+## Features
+- User Authentication: Register, login, logout, and profile management
+- Blog Management: Create, read, update, and delete blog posts
+- Comments: Add, edit, and delete comments on blogs
+- Media Uploads: Support for image uploads (profile pictures and blog cover images)
+- Input Validation: Comprehensive validation for all data inputs
+- JWT Authentication: Secure token-based authentication with cookies
 
 ---
 
 ## User Routes
-
 All user-related routes are prefixed with `/users`.
 
 ### 1. User Registration
 - `POST /users/register`
-- **Description:** Registers a new user.
+- Registers a new user.
 - **Body:**
   ```json
   {
@@ -19,7 +28,7 @@ All user-related routes are prefixed with `/users`.
     "password": "yourpassword"
   }
   ```
-- **Success (201):** Sets `token` cookie.
+- **Success (201):**
   ```json
   { "msg": "user registered successfully" }
   ```
@@ -30,7 +39,7 @@ All user-related routes are prefixed with `/users`.
 
 ### 2. User Login
 - `POST /users/login`
-- **Description:** Logs in an existing user.
+- Logs in an existing user.
 - **Body:**
   ```json
   {
@@ -38,7 +47,7 @@ All user-related routes are prefixed with `/users`.
     "password": "yourpassword"
   }
   ```
-- **Success (200):** Sets `token` cookie.
+- **Success (200):**
   ```json
   { "msg": "user logined successfully" }
   ```
@@ -49,9 +58,8 @@ All user-related routes are prefixed with `/users`.
 
 ### 3. User Logout
 - `POST /users/logout`
-- **Description:** Logs out the current user by clearing the token.
-- **Auth:** Requires `token` cookie.
-- **Success (200):** Clears `token` cookie.
+- Logs out the current user by clearing the token.
+- **Success (200):**
   ```json
   { "msg": "logged out successfully" }
   ```
@@ -62,8 +70,7 @@ All user-related routes are prefixed with `/users`.
 
 ### 4. View User Profile
 - `GET /users/profile`
-- **Description:** Retrieves the profile of the currently logged-in user.
-- **Auth:** Requires `token` cookie.
+- Retrieves the profile of the currently logged-in user.
 - **Success (200):**
   ```json
   {
@@ -81,8 +88,7 @@ All user-related routes are prefixed with `/users`.
 
 ### 5. Edit User Profile
 - `POST /users/profile`
-- **Description:** Updates the profile of the currently logged-in user.
-- **Auth:** Requires `token` cookie.
+- Updates the profile of the currently logged-in user.
 - **Body (Optional fields):**
   ```json
   {
@@ -103,8 +109,7 @@ All user-related routes are prefixed with `/users`.
 
 ### 6. Delete User Account
 - `POST /users/delete`
-- **Description:** Deletes the account of the currently logged-in user.
-- **Auth:** Requires `token` cookie.
+- Deletes the account of the currently logged-in user.
 - **Success (200):**
   ```json
   { "msg": "user deleted successfully" }
@@ -117,12 +122,11 @@ All user-related routes are prefixed with `/users`.
 ---
 
 ## Blog Routes
-
 All blog-related routes are prefixed with `/blogs`.
 
 ### 1. List All Blogs
 - `GET /blogs/listAll`
-- **Description:** Lists all blogs (without their body content).
+- Lists all blogs (without their body content).
 - **Success (200):**
   ```json
   { "blogs": [ ... ] }
@@ -138,7 +142,7 @@ All blog-related routes are prefixed with `/blogs`.
 
 ### 2. View Blog
 - `GET /blogs/view/:id`
-- **Description:** View a single blog by its ID.
+- View a single blog by its ID.
 - **Success (200):**
   ```json
   { "blog": { ... } }
@@ -150,8 +154,7 @@ All blog-related routes are prefixed with `/blogs`.
 
 ### 3. List User's Blogs
 - `GET /blogs/listUser`
-- **Description:** Lists all blogs created by the logged-in user (without their body content).
-- **Auth:** Requires `token` cookie or header.
+- Lists all blogs created by the logged-in user (without their body content).
 - **Success (200):**
   ```json
   { "blogs": [ ... ] }
@@ -167,8 +170,7 @@ All blog-related routes are prefixed with `/blogs`.
 
 ### 4. Create Blog
 - `POST /blogs/create`
-- **Description:** Creates a new blog for the logged-in user.
-- **Auth:** Requires `token` cookie or header.
+- Creates a new blog for the logged-in user.
 - **Body:**
   ```json
   {
@@ -189,8 +191,7 @@ All blog-related routes are prefixed with `/blogs`.
 
 ### 5. Edit Blog
 - `POST /blogs/edit/:id`
-- **Description:** Edits an existing blog (only by the owner).
-- **Auth:** Requires `token` cookie or header.
+- Edits an existing blog (only by the owner).
 - **Body (Optional fields):**
   ```json
   {
@@ -211,8 +212,7 @@ All blog-related routes are prefixed with `/blogs`.
 
 ### 6. Delete Blog
 - `POST /blogs/delete/:id`
-- **Description:** Deletes a blog (only by the owner).
-- **Auth:** Requires `token` cookie or header.
+- Deletes a blog (only by the owner).
 - **Success (200):**
   ```json
   { "msg": "blog deleted successfully" }
@@ -225,12 +225,11 @@ All blog-related routes are prefixed with `/blogs`.
 ---
 
 ## Comment Routes
-
 All comment-related routes are prefixed with `/comments`.
 
 ### 1. List Comments for a Blog
 - `GET /comments/listBlogComments/:blogId`
-- **Description:** Lists all comments for a specific blog, populated with the owner's information.
+- Lists all comments for a specific blog, populated with the owner's information.
 - **Success (200):**
   ```json
   { "comments": [ ... ] }
@@ -246,8 +245,7 @@ All comment-related routes are prefixed with `/comments`.
 
 ### 2. List a User's Comments
 - `GET /comments/listUserComments`
-- **Description:** Lists all comments made by the currently logged-in user.
-- **Auth:** Requires `token` cookie or header.
+- Lists all comments made by the currently logged-in user.
 - **Success (200):**
   ```json
   { "comments": [ ... ] }
@@ -263,8 +261,7 @@ All comment-related routes are prefixed with `/comments`.
 
 ### 3. Create a Comment
 - `POST /comments/createComment/:blogId`
-- **Description:** Adds a new comment to a specific blog.
-- **Auth:** Requires `token` cookie or header.
+- Adds a new comment to a specific blog.
 - **Body:**
   ```json
   {
@@ -282,8 +279,7 @@ All comment-related routes are prefixed with `/comments`.
 
 ### 4. Edit a Comment
 - `POST /comments/editComment/:id`
-- **Description:** Edits an existing comment (only by the owner).
-- **Auth:** Requires `token` cookie or header.
+- Edits an existing comment (only by the owner).
 - **Body:**
   ```json
   {
@@ -301,8 +297,7 @@ All comment-related routes are prefixed with `/comments`.
 
 ### 5. Delete a Comment
 - `POST /comments/deleteComment/:id`
-- **Description:** Deletes a comment (only by the owner).
-- **Auth:** Requires `token` cookie or header.
+- Deletes a comment (only by the owner).
 - **Success (200):**
   ```json
   { "msg": "comment deleted successfully" }
@@ -311,3 +306,12 @@ All comment-related routes are prefixed with `/comments`.
   ```json
   { "error": "Error message" }
   ```
+
+---
+
+## Other Functionalities
+- **Media Uploads:** Images for blogs and profiles are uploaded to Cloudinary using Multer middleware. Supported formats: JPG, JPEG, PNG, WebP.
+- **Input Validation:** All routes use express-validator for robust input validation.
+- **Authentication:** JWT-based authentication with tokens stored in cookies. Protected routes use the `authe` middleware.
+- **Data Deletion:** When a user is deleted, all their blogs and comments are also deleted. When a blog is deleted, all its comments are deleted. Images are removed from Cloudinary when their associated content is deleted.
+- **Error Handling:** Validation errors and file upload errors are returned with clear messages and appropriate HTTP status codes.

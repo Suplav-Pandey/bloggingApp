@@ -7,9 +7,9 @@ const cloudinary= require("./cloudinary");
 const storage = new CloudinaryStorage({
   cloudinary,
   params: {
-    folder: "user-uploads", // Folder name in Cloudinary
-    allowed_formats: ["jpg", "jpeg", "png"],
-    transformation: [{ width: 500, height: 500, crop: "limit" }], // optional
+    folder: "BloggingWeb", // Folder name in Cloudinary
+    allowed_formats: ["jpg", "jpeg", "png", "webp"],
+    transformation: [{ width: 450, height: 450, crop: "limit" }], // optional
   },
 });
 

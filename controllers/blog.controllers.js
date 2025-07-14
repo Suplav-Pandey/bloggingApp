@@ -57,7 +57,7 @@ async function handleBlogCreation(req, res){
         if(!req.file){
             return res.status(400).json({"error": "converImg is not uploaded"});
         }
-        const converImg=  {
+        const coverImg=  {
             url:req.file.path,
             id: req.file.filename
         };
@@ -67,7 +67,7 @@ async function handleBlogCreation(req, res){
         const blog= await Blog.create({
             title,
             desc,
-            coverImgUrl,
+            coverImg,
             body,
             owner: user._id
         });
@@ -131,7 +131,7 @@ async function handleBlogDelete(req,res){
             return res.status(403).json({"error": "current logined user is not owner of blog or blog not found"});
         }
         //deleting coverimage of the blog
-        cloudinary.uploader.destroy(`Blogging-Web/${blog.coverImg.id}`);
+        cloudinary.uploader.destroy(`BloggingWeb/${blog.coverImg.id}`);
         
         return res.status(200).json({"msg": "blog deleted successfully"});
     }
