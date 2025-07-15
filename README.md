@@ -4,6 +4,17 @@ A RESTful API for a blogging platform with user authentication, blog management,
 
 ---
 
+## Key Features
+
+- **Comprehensive RESTful API**: Full CRUD (Create, Read, Update, Delete) operations for Users, Blogs, and Comments.
+- **Secure Authentication**: Robust user authentication and session management using JSON Web Tokens (JWT) stored in secure, HTTP-only cookies.
+- **Media Management**: Seamlessly handles image uploads for profile pictures and blog cover images, leveraging the Cloudinary cloud service.
+- **Data Integrity**: Ensures database consistency with cascading deletes. For instance, deleting a user also removes all their associated blogs, comments, and uploaded images.
+- **Robust Validation**: Implements comprehensive and secure server-side validation for all incoming data using `express-validator`.
+- **Role-Based Authorization**: Protects routes and actions, ensuring that users can only modify their own content.
+
+---
+
 ## Features
 - User Authentication: Register, login, logout, and profile management
 - Blog Management: Create, read, update, and delete blog posts
@@ -23,9 +34,12 @@ All user-related routes are prefixed with `/users`.
 - **Body:**
   ```json
   {
-    "username": { "firstname": "John", "lastname": "Doe" },
-    "email": "john.doe@example.com",
-    "password": "yourpassword"
+    "username": { 
+      "firstname": "John", // Required, min 3 characters, uppercase
+      "lastname": "Doe"    // Optional
+    },
+    "email": "john.doe@example.com",    // Required, unique, lowercase
+    "password": "yourpassword"          // Required, min 3 characters
   }
   ```
 - **Success (201):**
@@ -34,7 +48,7 @@ All user-related routes are prefixed with `/users`.
   ```
 - **Error (400):**
   ```json
-  { "error": "..." } // or array of validation errors
+  { "error": "..." } // Validation errors or email already exists
   ```
 
 ### 2. User Login
@@ -55,68 +69,95 @@ All user-related routes are prefixed with `/users`.
   ```json
   { "error": "email or password is incorrect" }
   ```
+- Sets HTTP-only cookie with JWT token
 
 ### 3. User Logout
 - `POST /users/logout`
 - Logs out the current user by clearing the token.
+- Requires authentication
 - **Success (200):**
   ```json
   { "msg": "logged out successfully" }
   ```
-- **Error (400):**
+- **Error (401):**
   ```json
   { "error": "you are not logged in" }
   ```
 
-### 4. View User Profile
+### 4. Delete User Account
+- `POST /users/delete`
+- Deletes user account and all associated data
+- Requires authentication
+- Cascading deletion: removes all user's blogs, comments, and associated images
+- **Success (200):**
+  ```json
+  { 
+    "msg": "user deleted successfully",
+    "cloudinary": "ok"  // Status of profile image deletion
+  }
+  ```
+- **Error (401/500):**
+  ```json
+  { "error": "you are not logged in" }
+  { "error": "internal server error" }
+  ```
+
+### 5. View User Profile
 - `GET /users/profile`
-- Retrieves the profile of the currently logged-in user.
+- Retrieves the profile of the currently logged-in user
+- Requires authentication
 - **Success (200):**
   ```json
   {
-    "firstname": "John",
-    "lastname": "Doe",
-    "email": "john.doe@example.com",
-    "profileImgUrl": "/userProfile/default.png",
-    "role": "user"
+    "user": {
+      "username": {
+        "firstname": "John",
+        "lastname": "Doe"
+      },
+      "email": "john.doe@example.com",
+      "profileImg": {
+        "url": "cloudinary-url",
+        "id": "cloudinary-id"
+      },
+      "role": "user"
+    }
   }
   ```
 - **Error (401):**
   ```json
-  { "error": "invalid token" }
+  { "error": "you are not logged in" }
   ```
 
-### 5. Edit User Profile
+### 6. Edit User Profile
 - `POST /users/profile`
-- Updates the profile of the currently logged-in user.
-- **Body (Optional fields):**
+- Updates the profile of the currently logged-in user
+- Requires authentication
+- Supports multipart/form-data for profile image upload
+- **Body (All fields optional):**
   ```json
   {
-    "username": { "firstname": "Johnny", "lastname": "Doer" },
-    "password": "newpassword123",
-    "profileImgUrl": "/new/image.png",
-    "role": "admin"
+    "username": { 
+      "firstname": "Johnny",  // min 3 characters
+      "lastname": "Doer"
+    },
+    "email": "new.email@example.com",
+    "password": "newpassword",         // min 3 characters
+    "removeProfileImg": true,          // Set to true to remove profile image
+    "role": "user"                     // enum: ["admin", "user"]
   }
   ```
+- File upload field: `profileImg`
 - **Success (200):**
   ```json
-  { "msg": "user updated" }
+  { 
+    "msg": "user updated",
+    "cloudinary": "ok"  // If profile image was changed
+  }
   ```
 - **Error (400/401):**
   ```json
-  { "error": "Error message" }
-  ```
-
-### 6. Delete User Account
-- `POST /users/delete`
-- Deletes the account of the currently logged-in user.
-- **Success (200):**
-  ```json
-  { "msg": "user deleted successfully" }
-  ```
-- **Error (401/500):**
-  ```json
-  { "error": "Error message" }
+  { "error": "validation error message" }
+  { "error": "you are not logged in" }
   ```
 
 ---
@@ -311,7 +352,7 @@ All comment-related routes are prefixed with `/comments`.
 
 ## Other Functionalities
 - **Media Uploads:** Images for blogs and profiles are uploaded to Cloudinary using Multer middleware. Supported formats: JPG, JPEG, PNG, WebP.
-- **Input Validation:** All routes use express-validator for robust input validation.
-- **Authentication:** JWT-based authentication with tokens stored in cookies. Protected routes use the `authe` middleware.
-- **Data Deletion:** When a user is deleted, all their blogs and comments are also deleted. When a blog is deleted, all its comments are deleted. Images are removed from Cloudinary when their associated content is deleted.
+- **Input Validation:** All routes use `express-validator` for robust input validation.
+- **Authentication & Authorization:** JWT-based authentication with tokens stored in cookies. Protected routes use custom middleware to ensure users are logged in and authorized to perform actions.
+- **Data Integrity:** When a user is deleted, all their blogs and comments are also deleted. When a blog is deleted, all its comments are deleted. Images are removed from Cloudinary when their associated content is deleted.
 - **Error Handling:** Validation errors and file upload errors are returned with clear messages and appropriate HTTP status codes.

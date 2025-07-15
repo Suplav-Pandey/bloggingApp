@@ -74,11 +74,11 @@ async function handleUserdelete(req, res){
 
         //deleting all comments on the blogs created by user
         const blogs= await Blog.find({owner : user._id})
-        blogs.forEach(async (blog)=>{
+        await Promise.all(blogs.map(async (blog)=>{
             //deleting coverimage of every blog from cloudinary
             await cloudinary.uploader.destroy(`${blog.coverImg.id}`);//review it
             await Comments.deleteMany({blog: blog._id});//deleting comments
-        })
+        }));
 
         //deleting all blogs
         await Blog.deleteMany({owner : user._id});

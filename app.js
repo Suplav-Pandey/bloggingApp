@@ -27,3 +27,13 @@ app.listen(port, (error)=>{
     if(error)console.log("server error", err);
     console.log("server started on port:", port)
 });
+
+//somethings left
+
+//step1-> sorting and filter -> blogs and comments, other things that affect user experience
+
+//step2-> role based access, jwt access+refresh tokens, like feature
+
+//step3-> rate limmiting, caching(rdis), logging, dockerize, test it.
+
+//final

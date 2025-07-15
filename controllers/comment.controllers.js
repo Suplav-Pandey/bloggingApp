@@ -1,4 +1,5 @@
 const Comment= require("../models/comment.models");
+const Blog=require("../models/blog.models");
 const {validationResult}= require("express-validator");
 
 async function handleListBlogComments(req, res){
@@ -11,7 +12,7 @@ async function handleListBlogComments(req, res){
         return res.status(200).json({"comments": comments});
     }
     catch(err){
-        return res.status(400).json({"errors": err.message});
+        return res.status(400).json({"error": err.message});
     }
 }
 
@@ -27,7 +28,7 @@ async function handleListUserComments(req,res){
         return res.status(200).json({"comments": comments});
     }
     catch(err){
-        return res.status(400).json({"errors": err.message});
+        return res.status(400).json({"error": err.message});
     }
 }
 
@@ -38,13 +39,15 @@ async function handleCreateComment(req, res){
             return res.status(401).json({"error":"you must login to create comment"});
         }
 
+        const userId=user._id;
+        const blogId= req.params.blogId;
+        const blog= await Blog.findOne({_id : blogId});
+        if(!blog)return res.status(400).json({"error": "there is not blog to comment on"});
+
         const errors= validationResult(req);
         if(!errors.isEmpty()){
             return res.status(400).json({"error": errors.array()});
         }
-
-        const userId=user._id;
-        const blogId= req.params.blogId;
 
         const comment= await Comment.create({
             body: req.body.body,
@@ -55,7 +58,7 @@ async function handleCreateComment(req, res){
         return res.status(201).json({"msg": "comment created successfully"});
     }
     catch(err){
-        return res.status(400).json({"errors": err.message});
+        return res.status(400).json({"error": err.message});
     }
 }
 
@@ -87,7 +90,7 @@ async function handleEditComment(req,res){
         return res.status(200).json({"msg": "comment edited successfully"});
     }
     catch(err){
-        return res.status(400).json({"errors": err.message});
+        return res.status(400).json({"error": err.message});
     }
 }
 
@@ -109,7 +112,7 @@ async function handleDeleteComment(req, res){
         return res.status(200).json({"msg": "comment deleted successfully"});
     }
     catch(err){
-        return res.status(400).json({"errors": err.message});
+        return res.status(400).json({"error": err.message});
     }
 }
 
