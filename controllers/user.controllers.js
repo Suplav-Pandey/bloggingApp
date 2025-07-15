@@ -68,29 +68,31 @@ async function handleUserdelete(req, res){
         const user=req.user;
         if(!user)return res.status(401).json({"error": "you are not logged in"});
 
-        const userToBeDeleted=await User.findOneAndDelete({_id: user._id});//deleting user
-        if(!userToBeDeleted){//if no user found
-            return res.status(400).json({"error": "no user found"});
-        }
-
         //user found so delete all information associated with it
-        //deleting its porfile image from cloudinary
-        cloudinary.uploader.destroy(`BloggingWeb/${userToBeDeleted?.profileImg.id}`);//review it
+        //deleting all comments done by this user
+        await Comments.deleteMany({owner: user._id});
+
         //deleting all comments on the blogs created by user
         const blogs= await Blog.find({owner : user._id})
         blogs.forEach(async (blog)=>{
             //deleting coverimage of every blog from cloudinary
-            cloudinary.uploader.destroy(`BloggingWeb/${blog.coverImg.id}`);//review it
+            await cloudinary.uploader.destroy(`${blog.coverImg.id}`);//review it
             await Comments.deleteMany({blog: blog._id});//deleting comments
         })
+
         //deleting all blogs
         await Blog.deleteMany({owner : user._id});
-        //deleting all comments done by this user
-        await Comments.deleteMany({owner: user._id});
 
-        //blacklisting token in future
-        return res.status(200).clearCookie('token').json({"msg": "user deleted successfully"});
+        const userToBeDeleted=await User.findOneAndDelete({_id: user._id});//deleting user
+        if(!userToBeDeleted){//if no user found
+            return res.status(400).json({"error": "no user found"});
+        }        
 
+        //deleting its porfile image from cloudinary
+        const result =await cloudinary.uploader.destroy(`${userToBeDeleted?.profileImg.id}`);
+
+        //blacklisting token in future-> result will only give response of user profile image
+        return res.status(200).clearCookie('token').json({"msg": "user deleted successfully", "cloudinary": result?.result });
     }catch(err){
         res.status(500).json({"error": err.message});
     }
@@ -105,11 +107,7 @@ async function handleViewProfile(req, res){
         if(!fullUser)return res.status(400).json({"error": "you are not logged in"});
 
         return res.status(200).json({
-            firstname: fullUser.username.firstname,
-            lastname: fullUser.username?.lastname,
-            email: fullUser.email,
-            profileImgUrl: fullUser?.profileImg.url,//serve image using cloudinary public image url
-            role: fullUser.role
+            user: fullUser
         });
     }catch(err){
         res.status(401).json({"error":err.message})
@@ -120,6 +118,11 @@ async function handleEditProfile(req, res){
     try{
         const user= req.user;
         if(!user)return res.status(401).json({"error": "you are not logged in"});
+
+        const errors=validationResult(req);
+        if(!errors.isEmpty())return res.status(400).json({"error": errors.array()});
+
+        if(!req.body)return res.status(400).json({"error":"you did not send anything to edit"});
         
         const updatedUser= req.body;//if user want to remove profile image it can click on removeProfileImg
 
@@ -140,18 +143,20 @@ async function handleEditProfile(req, res){
         const fullUser= await User.findOneAndUpdate({_id: user._id}, {
             username: updatedUser?.username, 
             password: updatedUser?.password, 
+            email: updatedUser?.email,
             profileImg: updatedUser?.profileImg,//updating image
             role: updatedUser?.role
-        },{runValidators: true});
+        },{runValidators: true, new: false});//to give old user before update
 
         //deleting old profile image from cloudinary when we recieve new one or a request of removing
+        let result= undefined;
         if(req.file || updatedUser.removeProfileImg){
-            cloudinary.uploader.destroy(`BloggingWeb/${fullUser?.profileImg.id}`);
+            result=await cloudinary.uploader.destroy(`${fullUser?.profileImg.id}`);
         }
 
         //new token shall be genetared to accomodate new user name and profile image url in it
         const token= jwt.sign({_id: user._id, name: fullUser.username.firstname, profileImg: profileImg?.url}, process.env.JWT_SECRET);
-        res.status(200).cookie('token', token).json({"msg": "user updated"});
+        res.status(200).cookie('token', token).json({"msg": "user updated", "cloudinary": result?.result});
     }catch(err){
         res.status(400).json({"error":err.message});
     }

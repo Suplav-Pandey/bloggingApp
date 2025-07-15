@@ -1,4 +1,6 @@
 const Blog= require("../models/blog.models");
+const Comment= require("../models/comment.models");
+const cloudinary = require("../config/cloudinary");
 const {validationResult}= require("express-validator");
 
 async function handleAllBlogsListing(req,res){//to list all blogs
@@ -92,6 +94,8 @@ async function handleBlogEdit(req,res){
             return res.status(400).json({"error": errors.array()});
         }
 
+        if(!req.body)return res.status(400).json({"error": "you did not send anything to edit"});
+
         //taking coverimage of blog
         req.body.coverImg= (!req.file) ? undefined : {
             url:req.file.path,
@@ -109,8 +113,10 @@ async function handleBlogEdit(req,res){
             return res.status(403).json({"error": "current logined user is not owner or blog not found"});
         }
         //new image uploaded so deleting old coverimage
-        if(req.file)cloudinary.uploader.destroy(`Blogging-Web/${blog.coverImg.id}`);
-        return res.status(200).json({"msg": "blog updated successfully"});
+        let result=undefined;
+        if(req.file)result = await cloudinary.uploader.destroy(`${blog.coverImg.id}`);
+
+        return res.status(200).json({"msg": "blog updated successfully", "cloudinary": result?.result});
     }
     catch(err){
         return res.status(400).json({"error": err.message});
@@ -125,15 +131,18 @@ async function handleBlogDelete(req,res){
         }
 
         const id=req.params.id;
+        
+        await Comment.deleteMany({blog: id});//deleting all comments associated with this blog
+
         const blog= await Blog.findOneAndDelete({ _id: id, owner: user._id });//we will find a blog with given id and and owner as current user and then will delete it
 
         if(!blog){
             return res.status(403).json({"error": "current logined user is not owner of blog or blog not found"});
         }
         //deleting coverimage of the blog
-        cloudinary.uploader.destroy(`BloggingWeb/${blog.coverImg.id}`);
-        
-        return res.status(200).json({"msg": "blog deleted successfully"});
+        const result = await cloudinary.uploader.destroy(`${blog.coverImg.id}`);
+
+        return res.status(200).json({"msg": "blog deleted successfully", "cloudinary": result?.result});
     }
     catch(err){
         return res.status(400).json({"error": err.message});

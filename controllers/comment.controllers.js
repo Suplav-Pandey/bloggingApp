@@ -74,8 +74,10 @@ async function handleEditComment(req,res){
         const userId=user._id;
         const commentId= req.params.id;
 
+        if(!req.body)return res.status(400).json({"error": "you did not send anything to edit"});
+
         const comment= await Comment.findOneAndUpdate({ owner: userId, _id: commentId },{
-            body: req.body?.body
+            body: req.body.body
         });
 
         if(!comment){
